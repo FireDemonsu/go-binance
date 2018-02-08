@@ -8,6 +8,7 @@ package binance
 
 import (
     "fmt"
+    "net"
 )
 
 
@@ -24,6 +25,29 @@ func (b *Binance) GetAccountInfo() (account Account, err error) {
     return
 }
 
+func (b *Binance) CreateListenKey() (listenKey ListenKey, err error) {
+    reqUrl := fmt.Sprintf("api/v1/userDataStream")
+
+    _, err = b.client.do("POST", reqUrl, "", true, &listenKey)
+    if err != nil {
+        return
+    }
+
+    return
+}
+
+func (b *Binance) UpdateListenKey(listenKey ListenKey) (err error) {
+    reqUrl := fmt.Sprintf("api/v1/userDataStream?listenKey=%s", listenKey.ListenKey)
+
+    _, err = b.client.do("PUT", reqUrl, "", true, nil)
+    if err != nil {
+        return
+    }
+
+    return
+}
+
+///api/v1/userDataStream
 
 // Filter Basic Account Information To Retrieve Current Holdings
 func (b *Binance) GetPositions() (positions []Balance, err error) {

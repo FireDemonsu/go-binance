@@ -103,3 +103,6 @@ type DepositList struct {
     Deposits []Deposit `json:"depositList"`
 }
 
+type ListenKey struct {
+    ListenKey string `json:"listenKey"`
+}

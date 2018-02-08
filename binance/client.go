@@ -6,7 +6,7 @@ package binance
 
 import (
     "fmt"
-    "time"
+    //"time"
     "errors"
     "strings"
     "io/ioutil"
@@ -15,6 +15,7 @@ import (
     "crypto/sha256"
     "encoding/hex"
     "encoding/json"
+    "time"
 )
 
 type Client struct {
@@ -72,20 +73,22 @@ func (c *Client) do(method, resource, payload string, auth bool, result interfac
 
         req.Header.Add("X-MBX-APIKEY", c.key)
 
-        q := req.URL.Query()
+        if resource != "api/v1/userDataStream" {
+            q := req.URL.Query()
 
-        timestamp := time.Now().Unix() * 1000
-        q.Set("timestamp", fmt.Sprintf("%d", timestamp))
+            timestamp := time.Now().Unix() * 1000
+            q.Set("timestamp", fmt.Sprintf("%d", timestamp))
 
-        mac := hmac.New(sha256.New, []byte(c.secret))
-        _, err := mac.Write([]byte(q.Encode()))
-        if err != nil {
-            return nil, err
+            mac := hmac.New(sha256.New, []byte(c.secret))
+            _, err := mac.Write([]byte(q.Encode()))
+            if err != nil {
+                return nil, err
+            }
+
+            signature := hex.EncodeToString(mac.Sum(nil))
+            req.URL.RawQuery = q.Encode() + "&signature=" + signature
         }
-
-        signature := hex.EncodeToString(mac.Sum(nil))
-        req.URL.RawQuery = q.Encode() + "&signature=" + signature
-    }   
+    }
 
     resp, err = c.httpClient.Do(req)
     if err != nil {
